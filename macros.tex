@@ -1,0 +1,46 @@
+\documentclass[twoside,11pt]{article}
+\usepackage{jmlr2e}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage[disable]{todonotes}
+%\usepackage{todonotes}
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{thmtools,thm-restate}
+%\usepackage{tipa}
+
+\setlist{noitemsep,topsep=0pt,parsep=0pt,partopsep=0pt}
+
+%
+\providecommand{\pgfsyspdfmark}[3]{}
+%
+%%\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+%
+%\newtheorem{theorem}{Theorem}[section]
+%\newtheorem{corollary}{Corollary}[theorem]
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{proposition}[theorem]{Proposition}
+
+%\theoremstyle{remark}
+%\newtheorem{example}[section]{Example}
+
+
+\newcommand{\ahat}[1]{\expandafter\hat#1}  %aligned hat
+\newcommand{\greq}[0]{\equiv_G} %ground equivalent
+%\newcommand{\eeq}[0]{\
+%
+%\newcommand{\esig}[3]{Yo}%{\langle #1,#2,\dots,#3 \rangle} %signature with elipses
+\newcommand{\ang}[1]{\langle #1 \rangle} %wraps argument in angle brackets
+\newcommand{\inst}[1]{Inst(#1)}
+\newcommand{\ec}{{\mathcal{E}\mathcal{C}}} %set of essential classes
+\newcommand{\Subterms}[0]{\mathit{Subterms}}
+\newcommand{\bsq}[1]{'#1\rq}
+\newcommand{\tpre}{\textbf{\textless}}
+
+
+% Heading arguments are {volume}{year}{pages}{submitted}{published}{author-full-names}
+
+%\jmlrheading{1}{2000}{1-48}{4/00}{10/00}{meila00a}{Benjamin Caulfield, Ashish Tiwari, and Sanjit A. Seshia}
+
+\ShortHeadings{Exact Learning of Equational Theories}{Caulfield and Tiwari}
+\firstpageno{1}

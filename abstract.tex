@@ -1,0 +1,12 @@
+Equational logic is a formalism used to describe infinite sets of equations between terms (\emph{theories}) using finite sets of equations (\emph{presentations}). 
+Both functional programs and logic programs can be naturally represented as equational logic presentations. 
+Therefore, learning presentations in equational logic can be seen as a form of program synthesis. 
+In general, it is undecidable whether terms are equivalent via a finite presentation.
+So learning equational presentations is generally intractable. 
+
+This paper investigates the exact learning of a restricted class of theories known as \emph{non-collapsing shallow theories}, which can be presented by equations where variables only appear at depth one. 
+The learning algorithms use examples and queries of equations between ground terms, meaning there are no variables in the equations.
+It is shown that these theories cannot be learned in the limit from only positive examples. 
+A polynomial time algorithm is given which creates a hypothesis presentation consistent with positive and negative examples which will learn in the limit a presentation for the target theory.
+Finally, an algorithm is given which learns a presentation in polynomial time from a minimally adequate teacher.
+It is shown that the learned presentations are canonical with respect to an ordering on terms and the presentation is at most polynomially larger than the minimal presentation of the same theory.

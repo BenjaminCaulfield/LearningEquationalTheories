@@ -1,0 +1,89 @@
+ 
+The algorithm from the previous section requires the existence of $2d$ distinct ``auxiliary" symbols. 
+However, it is likely that an oracle will only be able to answer queries over a given alphabet. \todo{need more of an explanation here?}
+Therefore, it is worthwhile to try to run the above algorithm without the use of these symbols.
+In this section, we accomplish this by maintaining a set $T_\alpha$ containing terms $t^1_\alpha, \dots, t^{2d}_\alpha$ from distinct equivalents classes which are believed to be non-essential in $E$.
+We will first show how to update the algorithm, then show how to find new $t_\alpha$ terms.
+
+\subsubsection{Updating the algorithm}
+The new algorithm works the same as the old one, using the $t_\alpha$ terms in place of the $C_\alpha$ symbols to infer the location of variables and essential terms. 
+Each time an MGSE is found, the \emph{representative query} for that MGSE is stored.
+The representative query for an MGSE $e$ is a pair ($s\approx t$, $\sigma$), where $\sigma$ maps variables to terms in $T\alpha$ and $s\approx t$ is the representative equation of $e$.
+Note that there is only one $\sigma$ such that $s\sigma \approx  t\sigma$  is queried to find $e$, so the representative query is unique.
+%$\ang{f,s_1,\dots,s_k} = \ang{g,t_1,\dots,t_l}$ is a term $f(u_1,\dots,u_k)=g(w_1,\dots,w_l)$, where each $u_i$ and $w_i$ is either a $t_\alpha$ term or an essential term.
+
+Since the $t_\alpha$ terms may actually be essential, the learned MGSEs may be more general than the actual MGSEs. 
+For example, let $E := \{ f(a,x) = g(c)\}$, $t^1_\alpha := a$, $t^2_\alpha := b$, and $t^3_\alpha := d$. 
+Using membership queries, the algorithm can determine that $f(t^1_\alpha, t^2_\alpha) \not \approx_E g(t^3_\alpha)$ (i.e., $f(a,b) \not \approx_E g(d)$), but $f(t^1_\alpha, t^2_\alpha) \approx_E g(c)$.
+This leads the algorithm to conclude that $\ang{f,x,y} \approx \ang{g,[c]}$ is an MGSE of $E$, since $t^1_\alpha$ is believed to mark the place of a variable.
+However, $t^1_\alpha$ is actually an essential term, and the learned MGSE is a generalization of the true MGSE, $\ang{f,[a],y} \approx \ang{g,[c]}$. 
+
+Therefore, when a hypothesis $\ahat{E}$ is given to an oracle, the oracle may return a \emph{negative} counter-example $s \approx t$, meaning $s \approx_{\ahat{E}} t$ but $s \not \approx_E t$. 
+
+Assume such a negative counter-example $s\approx t$ is given.
+Using the algorithm described below to find a new term $t'_\alpha$.
+Using Proposition \ref{erep}, we can construct a proof that $s \approx_{\ahat{E}} t$ of the form $s = u_0 \approx_{e_0}^{p_0} u_1 \dots \approx_{e_{r-1}}^{p_{r-1}} u_r = t$. \todo{we don't really need the proposition to construct this proof}
+For each $i \in \{0,\dots, r-1\}$, query $u_i \approx u_{i+1}$. 
+Let $i'$ be the smallest index such that $u_{i'} \not\approx_E u_{i'+1}$. 
+Such an $i'$ must exist since otherwise, $s \approx_E t$ would hold.
+By the construction of $\ahat{E}$ in Proposition \ref{erep}, the equation $e_{i'}$ used at step $i'$ in the derivation must be the representative of some MGSE, $sig_1 \approx sig_2$ .
+Let $(u\approx v,\sigma)$ be the representative query of $sig_1 \approx sig_2$.
+Since $u_i \not\approx_E u_{i+1}$, but $u_i \approx_{u\approx v} u_{i+1}$, we know $sig_1 \approx sig_2$ must be an over-generalization. 
+Therefore, there is a variable in $sig_1 \approx sig_2$ that should be replaced at some positions with a ground term.
+For each variable $y \in Vars(sig_1) \cup Vars(sig_2)$, let $x \sigma_y:=x \sigma$ for all $x \ne y$ and $y \sigma_y  := t'_\alpha$.
+Query $s\sigma_y  \approx t \sigma_y$. 
+If the query returns \emph{false}, then $y \sigma$ must be an essential term. \todo{more proof here?}
+So set $T_\alpha := (T_\alpha \backslash \{y \sigma\}) \cup \{t'_\alpha\}$ and set $\ec := \ec \cup \{ [y \sigma] \}$.
+If no such variable is found, then $t'_\alpha$ must be essential. \todo{is this clear why?}
+So set $\ec := \ec \cup \{ t'_\alpha \}$, find a new $t_\alpha$ term, and repeat the above process. \todo{this last part is an optimization, since we've already added a new essential term}
+
+%Assume that $sig_1 = sig_2$ is of the form $\ang{f,s_1,\dots,s_k} = \ang{g,t_1,\dots,t_l}$.
+%Let $f(v_1,\dots,v_k)=g(w_1,\dots,w_l)$ be the term queried 
+
+
+\subsubsection{Finding new $t_\alpha$ terms}
+Throughout the run of this algorithm, we maintain a set $C := \{ C_1, \dots, C_r\}$.
+Each $C_i$ contains a set of terms that are equivalent in $E$, and $\bigcup_i C_i$ is subterm-closed.
+Each new $t_\alpha$ term is chosen as follows
+\begin{enumerate}
+\item If there is a constant $c$ not in $C$, then for each $i$ choose a $c_i \in C_i$. Query $c_i \approx c$.
+	\begin{itemize}
+	\item If there is an $i$ such that $c_i \approx_E c$, then add $c$ to $C_i$ and restart.
+	\item Otherwise, set $C := C \cup \{ \{c\} \}$ and return $t_\alpha := c$
+	\end{itemize}
+\item For each symbol $f$ of arity $k$ and each $(i_1,\dots,i_{k+1}) \in \{1,\dots,r\}^{k+1}$, query $f(c_{i_1}, \dots, c_{i_k}) \approx  c_{i_{k+1}}$, where each $c_i$ is in $C_i$
+	\begin{itemize}
+	\item	If $f(c_{i_1}, \dots, c_{i_k}) \approx_E  c_{i_{k+1}}$, then add $f(c_{i_1}, \dots, c_{i_k})$ to $C_{i_{k+1}}$.
+	\item If there is no $i_{k+1}$ such that $f(c_{i_1}, \dots, c_{i_k}) \approx_E  c_{i_{k+1}}$, then set $C := C \cup \{f(c_{i_1}, \dots, c_{i_k})\}$ and return $t_\alpha := f(c_{i_1}, \dots, c_{i_k})$
+	\end{itemize}
+\end{enumerate}
+
+As described above, the learning algorithm first finds a set of $2d$ different $t_\alpha$ terms,  then adds at most one new $t_\alpha$ terms for each class in $C$. 
+Therefore,  $|C|$ never exceeds $2d+ |\ec|$. 
+
+If the algorithm does not return any new $t_\alpha$, then the set of classes represented in $C_i$ is closed under each $f$ application. \todo{is closed under f-application clear? }
+Thus, every equivalence class is represented in $C$, and a presentation of $E$ of size $Poly(2d + |\ec|)$ can be easily inferred.
+
+Each call to this algorithm takes polynomial time assuming fixed $\Sigma$.
+%For any $E'$ such that $E' \greq E$, the learning algorithm calls the above algorithm polynomially many times in $|E|$. 
+
+\begin{example}
+Let $\Sigma := \{ g:1, a:0, b:0, c:0 \}$ and assume the target theory can be presented by $E := \{ g(a) \approx c\}$. 
+The algorithm queries $\ahat{E}  := \{ x \approx y \}$ to the oracle and the oracle returns false.
+It then sets $t^1_\alpha := a$ and $t^2_\alpha := b$.
+To find the MGSEs it queries $g(t^1_\alpha) \approx g(t^2_\alpha)$ (false), $g(t^1_\alpha) \approx a$ (false), $g(t^1_\alpha) \approx b$ (false), and $g(t^1_\alpha) \approx c$ (true).
+Since the algorithm believes that $t^1_\alpha$ (i.e., $a$) is not essential, the fact that $g(t^1_\alpha) \approx_E c$ leads it to conclude that $\ang{g,x} \approx \ang{c}$ is an MGSE. 
+It passes the hypothesis $\ahat{E}  := \{ g(x) \approx c\}$ to the oracle. 
+The oracle returns false and gives the negative counter-example $g(g(b))\approx c$, meaning $g(g(b))\not\approx_E c$ but $g(g(b))\approx_{\ahat{E}} c$.
+This equation is provable in $\ahat{E}$ by the derivation $g(g(b)) \approx_{g(x)\approx c} c$, implying that the equation $g(x) \approx c$ should not be in $\ahat{E}$.
+Therefore, $e := \ang{g, x} \approx \ang{c}$ is an over-generalization of an actual MGSE of $E$. 
+Since $e$ was added because of the representative query $e' := g(t^1_\alpha) \approx c$, one of the $t_\alpha$ terms used in $e'$ must be an essential term.
+%We can see that $t^1_\alpha$ is essential, but will go through the steps the algorithm takes. 
+The algorithm finds a new term $t'_\alpha := c$ and queries $g(t'_\alpha) \approx c$ (false).
+Since $g(t'_\alpha) \not\approx_E c$ and $g(t^1_\alpha) \not\approx_E c$, $t^1_\alpha$ must be an essential term. 
+So the algorithm adds $[a]$  to $\ec$ and sets $t^1_\alpha := c$.
+To find the MGSEs, the algorithm queries $g(t^1_\alpha) \approx g(t^2_\alpha)$ (false), $g(t^1_\alpha) \approx a$ (false), $g(t^1_\alpha) \approx b$ (false), $g(t^1_\alpha) \approx c$ (false), $g(a) \approx a$ (false), $g(a) \approx b$ (false), and $g(a) \approx c$ (true). 
+This yields the MGSE $\ang{g, [a]} \approx \ang{c}$.
+The algorithm sets $a$ to be the representative element of its equivalence class and queries $\ahat{E} := \{ g(a) \approx c \}$ to the oracle.
+The oracle returns true and the process completes. 
+\end{example}

@@ -1,0 +1,138 @@
+This section presents the main result from our paper: an efficient algorithm to learn non-collapsing shallow equational theories from ground queries and counter-examples to an oracle.
+These queries take the following two forms:
+\begin{itemize}
+\item \emph{Membership Query:} The algorithm presents a ground equation $s \approx t$ to the oracle and the oracle states whether or not $s \approx t \in Th_G(E)$,
+\item \emph{Equivalence Query:} The algorithm presents a hypothesis presentation $E'$ to the oracle and the oracle states whether or not $E' \greq E$. 
+If not, the oracle also returns a counter-example $s \approx t$ from the set $(Th_G(E) \backslash Th_G(E')) \cup (Th_G(E') \backslash Th_G(E))$.
+\end{itemize} 
+
+This algorithm will specifically learn the canonical presentation $E_{rep}$ of a theory $E$ over a fixed alphabet $\Sigma$.
+
+Throughout this section, unless otherwise stated, we will assume that every theory is non-trivial. 
+The algorithm can query the presentations $\emptyset$ and $\{x \approx y\}$ to the oracle in order to rule out the trivial cases.  \todo{ do we want to assume this? We need to alter it to now talk about algorithms, as well.}
+
+
+We will first show how to learn using a set of ``auxiliary symbols", $C_\alpha := \{\alpha_1, \alpha_2, \dots, \alpha_{2d}\}$, where $d$ is the maximum arity of any symbol in $\Sigma$. \todo{is this the right place to define $d$?}
+The symbols of $C_\alpha$ are all constants. 
+For each $\alpha_i \in C_\alpha$, we have the guarantee that $[\alpha_i]$ is not essential.%\todo{do we want to say their EQs are singletons as well? or that they are distinct?}
+Later, we will see how to learn non-collapsing shallow theories without assuming such a set $C_\alpha$ exists.
+
+The algorithm runs in iterations, creating a new hypothesis at each iteration.
+The structure of each iteration is as follows:
+\begin{enumerate}
+\item Use essential classes and $C_{\alpha}$ to find all MGSEs of $E$
+\item Find set $rep_\ec$ of minimal terms from each essential class and find a hypothesis $\ahat{E}$ for $E_{rep}$
+%\item Use essential classes and $C_{\alpha}$ to find a hypothesis presentation $E_{rep}$.
+\item Pose $\ahat{E}$ as an equivalence query to the oracle.
+	\begin{itemize}
+	\item If the oracle returns \emph{true} return $\ahat{E}$
+	\item Otherwise, we receive a counter-example $s\approx t$ such that $s \approx_E t$, but $s \not\approx_{\ahat{E}} t$.
+	\end{itemize}
+\item Use the counter-example to find an equation $s'\approx t'$ that is an instance of an unknown MGSE.
+\item Use $s'\approx t'$ to find an unknown essential class
+\item Start a new iteration from step 1
+\end{enumerate}
+
+Those familiar with Angluin's algorithm \citep{angluin87} will notice similarities with the above algorithm, where states are analogous to essential classes and equations are analogous to transitions. 
+
+
+\subsection{Finding the MGSEs}
+
+
+By the assumptions on $C_\alpha$, we can use membership queries to infer the location of variables in each MGSE.
+For example, if the query $f(\alpha_1) \approx g(\alpha_1,a)$ holds, then we know that the signature equation $\ang{f,x}\approx\ang{g,x,a}$ holds, since otherwise $[\alpha_1]$ would be essential.
+Given a set $C$ of representative essential terms of $E$, we can query all (polynomially many) pairs of terms from the set $\{f(s_1,\dots,s_k)  \, | \, f \in \Sigma_k, \forall i, s_i \in C \cup C_{\alpha} \}$. %\todo{excluding $C_{\alpha}^2$}
+We can find signature equations (and thus MGSEs) from the queries that return \emph{true}.
+  
+ \todo{add lemma and maybe more explanation here}
+
+
+
+\subsection{Finding $rep_\ec$} \todo{fix to deal with total size, not depth}
+We will show how to use the oracle to construct $rep_\ec$.
+For simplicity, we don't assume a fixed ordering $\tpre$ on terms, and just find representative terms of minimal size.
+The ordering $\tpre$ can be determined by the choices of representative terms. \todo{is it even worthwhile to define $\trep$ and point out that $E_{rep}$ is canonical, then?}
+
+Let $S$ be a subterm-closed set containing the smallest known term from each essential class. 
+We will proceed iteratively, finding a hypothesized representative $rep^j_{[s]}$ at each step $j$ for each $s \in S$.
+At each iteration, we will perform the following actions on each $s \in S$ in order of increasing size.
+Start with $j = 1$. %. and set $rep^0_{[s]}$ equal to the smallest $s' \in S$ such that $s' =_E s$.
+If $s$ is a constant and $rep^j_{[s]}$ is not yet defined, set $rep^j_{[s]} := s$.
+Now assume $rep^j_{[u]}$ is defined for each $u \in S$ such that $\|u\| < \|s\|$, but $rep^j_{[s]}$ is not yet defined.
+Let $s := f(s_1,\dots, s_k)$.
+Consider each MGSE  $e$ of the form $sig_1 \approx sig_2$ such that $s$ is an instance of $sig_1$.
+We will construct a term $t_e$ such that $s \approx t_e$ is an instance of $sig_1 \approx sig_2$.
+Let  $sig_1 := \ang{f, c_1,\dots, c_k}$ and $sig_2 := \ang{g, d_1,\dots,d_r}$.
+Consider each $i \in \{1, \dots, r\}$. 
+If $d_i$ is a variable and equal to some $c_j$ in $sig_1$, then set $t_i := rep^j_{[s_j]}$.
+If $d_i$ is a variable that doesn't appear in $sig_1$ then set $t_i := a$ for some constant $a$ (choose the same constant each time).
+Otherwise, $d_i$ is an essential class.
+If $rep^j_{d_i}$ is not yet defined, then stop constructing $t_e$.
+Otherwise, set $t_i := rep^j_{d_i}$.
+Let $t_e := g(t_1, \dots,t_r)$.
+Set $rep^j_{[s]}$ equal to the lowest-depth $t_e$ of all such MGSEs.
+
+Continue this process until $rep^j_{[s]} = rep^{j+1}_{[s]}$ for all $s \in S$. 
+By induction, it is easy to check that after each iteration $j$, all classes with representative elements of size less than or equal to $j$ are assigned a min-size representative.
+Therefore, this process completes after $max_{s \in S} \{ \|s\| \}$ iterations.
+
+
+\subsection{Assembling $\ahat{E}$ and Handling Counter-Examples}
+ So, assuming that we have identified all essential classes, we can efficiently find a presentation $\ahat{E}$ equal to $E_{rep}$. 
+ If we are missing an essential class, however, then $\ahat{E}$ will not correctly identify $E$ and the oracle will return some counter-example, $s\approx t$.
+ This counter-example will be positive, meaning that $s \approx_E t$, but $s \not \approx_{\ahat{E}} t$. 
+ This is possible in the following cases, which we will handle differently:
+ \begin{enumerate}
+ \item $s\approx t$ is an instance of an MGSE $sig_1 \approx sig_2$, but the representative equation for this $MGSE$ cannot be applied to $s\approx t$. Either, there is an essential term $u$ at depth 1 such that $u \not \approx_{\ahat{E}} rep_{[u]}$ or there are parallel terms $u$ and $v$ at depth 1 such that $u\approx_E v$ but $u \not \approx_{\ahat{E}} v$. In either case, we can recurse, treating $u\approx rep_{[u]}$ or $u\approx v$ as our new counter-example. %\todo{define parallel. handle case when $rep_{[u]}$ is bigger than $u$}.
+ \item $s\approx t$ is not an instance of any $MGSE$, and so $s\approx t$ is an instance of a missing MGSE.
+ \end{enumerate}
+
+Each time a counter-example is processed in case 1, we obtain a smaller counter-example. 
+By the construction of $\ahat{E}$, if a counter-example has constants on both sides, it will already be in $\ahat{E}$. 
+Therefore, this process will always find an instance $s'\approx t'$ of a missing MGSE. 
+
+This can only occur if there is an essential class that is missing from our known set of essential classes. \todo{refer to above theorem (not yet written)}
+To find the missing essential class, take any $u$ at depth 1 in $s'$ or $t'$ that is not in any known essential class (use oracle queries to confirm this).
+%Let $I \subset \mathbb{N}$ (resp. $I'$) be the set of indices depth 1 occurrences of terms of $[u]$ in $s'$ (resp. occurences of terms of $[u]$ in $t'$). 
+Let $I := D1P_{[u]}(s')$ and $J := D1P_{[u]}(t')$.
+%Let $\bar s$ (resp. $\bar t$) be formed by replacing each term at indices in $I$ in $s'$ (resp. $I'$ in $t'$) with $\alpha_1$. 
+Query $s'[\alpha_1]_I \approx t'[\alpha_1]_J$ to the oracle.
+By lemma \ref{ess_id}, $u$ is essential if and only if this query returns false.
+%Any $MGSE$ that has $s'\approx t'$ as an instance but does not contain $[u]$ in its body must have $\bar s \approx \bar t$ as an instance. 
+%Therefore, if the above query returns \emph{false}, then $[u]$ must be essential. %\todo{show this is iff}
+Otherwise, repeat the same process on another non-essential term. 
+
+Once the essential class is found, the algorithm begins the next iteration.
+
+%Since each iteration adds a new essential class and 
+ 
+\begin{example} 
+Let $\Sigma := \{ g:1, a:0, b:0, c:0 \}$ and assume that the target theory can be presented by $E := \{ g(a)\approx g(b), g(b) \approx c \}$.
+The algorithm queries $\ahat{E}  := \{ x \approx y \}$ to the oracle and the oracle returns false (the counter-example is ignored).
+The current hypothesis is that $\ec = \emptyset$.
+The algorithm creates a hypothesis for $MGSE(E)$ by querying $g(\alpha_1)\approx g(\alpha_2)$ (false), $g(\alpha_1)\approx a$ (false), $g(\alpha_1)\approx b$ (false), and $g(\alpha_1)\approx c$ (false). 
+So the hypothesis for $MGSE(E)$ is $\emptyset$ and the hypothesis presentation $\ahat{E} := \emptyset$ is passed to the oracle. \todo{do we want to name each hypothesis for $MGSE(E)$ e.g., $MGSE_1(E) \dots$?}
+The oracle returns $g(g(a)) \approx g(g(b))$ as a positive counter-example, meaning $g(g(a)) \approx_E g(g(b))$ but $g(g(a)) \not\approx_{\ahat{E}} g(g(b))$.
+The algorithm queries all depth-1 terms in the counter-example (i.e., $g(a)\approx g(b)$ (true) ) to determine that the signature of the equation with respect to $E$ is $\ang{g, [g(a)]} \approx \ang{g, [g(a)]}$.
+This signature holds in $\ahat{E} $, so $\ahat{E} $ must fail to prove $g(a) \approx g(b)$.
+The equation $g(a) \approx g(b)$ is treated as the new positive counter-example and the query $a \approx b$ (false) shows that its signature is $\ang{g, [a]} = \ang{g, [b]}$. 
+This signature equation must be an instance an unknown MGSE, so there must be an essential class in its body. 
+To determine which classes are essential, the algorithm queries $g(\alpha_1)\approx g(b)$ (false), $g(\alpha_1)\approx g(\alpha_2)$ (false), and $g(a)\approx g(\alpha_1)$ (false).
+This implies that $\ang{g, a} \approx \ang{g,b}$ is an MGSE, and that $[a]$ and $[b]$ are essential classes. 
+The hypothesis set of MGSEs is formed by making the following queries: $g(a) \approx g(b)$ (true), $g(a) \approx g(\alpha_1)$ (false), $g(\alpha_1) \approx g(b)$ (false), $g(\alpha_1) \approx g(\alpha_2)$ (false), $g(a) \approx a$ (false), $g(a) \approx b$ (false), $g(a) \approx c$ (true), $g(b) \approx a$ (false), $g(b) \approx b$ (false), and $g(b) \approx c$ (true). 
+This yields the MGSEs $\ang{g, a} \approx c$, $\ang{g, b} \approx c$, and $\ang{g, a} \approx \ang{g,b}$.
+The algorithm chooses $a$ and $b$ as the representative for their respective equivalence classes, yielding $\ahat{E}  := \{ g(a)\approx g(b), g(a) \approx c, g(b) \approx c\}$.
+This presentation is given to the oracle, which returns true, and the process completes. 
+\end{example}
+
+
+\begin{example}
+Let $\Sigma := \{ f:1, a:0 \}$ and assume that the target theory can be presented by $E := \{ f(x)\approx f(y) \}$.
+The algorithm queries $\ahat{E} := \{ x \approx y \}$ to the oracle and the oracle returns false (the counter-example is ignored).
+The current hypothesis is that $\ec = \emptyset$.
+The algorithm creates a hypothesis for $MGSE(E)$ by querying $f(\alpha_1) \approx f(\alpha_2)$ (true) and $f(\alpha_1) \approx a$ (false). 
+This yields the MGSE $\ang{f, x} \approx \ang{f, y}$ and the hypothesis presentation $\ahat{E} := \{ f(x) \approx f(y) \}$. 
+This is given to the oracle, the oracle returns true, and the process completes.
+\end{example}
+
+

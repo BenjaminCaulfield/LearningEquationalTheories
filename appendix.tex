@@ -1,0 +1,142 @@
+\appendix
+\section*{Appendix}
+
+
+
+\textbf{Lemma \ref{ess_id} } Let $s \approx t \in Th_G(E)$ and let $u$ be a term with $I := D1P_{[u]}(s)$ and $J := D1P_{[u]}(t)$.
+Then  $u$ is an essential term if and only if there is a $v$ such that $s[v]_I \approx t[v]_J \not\in Th_G(E)$.
+\begin{proof}
+Assume there is a $v$ such that $s[v]_I \approx t[v]_J \not\in Th_G(E)$.
+Let $sig_1 \approx sig_2$ be a signature equation with $s \approx t$ as an instance.
+Assume for contradiction that $[u]$ is not in the body of  $sig_1 \approx sig_2$.
+So there must only be variables at position $I$ in $sig_1$ and position $J$ in $sig_2$.
+Let $x$ be any such variable.
+Assume for contradiction w.l.o.g. that $x$ also appears in $sig_1$ at some position $i$ not in $I$.
+Since $i \not\in I$, $u \not\approx_E s|_i$, so $s \approx t \not\in Inst(sig_1 \approx sig_2)$. 
+Therefore $D1P_x(s) \subseteq I$ and $D1P_x(t) \subseteq J$, by contradiction.
+Therefore, $s[v]_I \approx t[v]_J \in Inst(sig_1 \approx sig_2)$.
+By contradiction, $u$ must be in the body of $sig_1 \approx sig_2$ and so $u$ must be an essential term. 
+
+Now assume $u$ is an essential term, and let $sig_1 \approx sig_2$ be an MGSE with $s \approx t$ as an instance and let $x$ be a fresh variable. 
+Assume for contradiction that for all $v$, $s[v]_I \approx_E t[v]_J$. 
+Then every ground instance of $s[x]_I \approx t[x]_J$ holds for $E$.
+Since the choice of $s \approx t$ was arbitrary, we can replace each $[u]$ in $sig_1 \approx sig_2$ with an $x$ to get a new signature that holds for $E$.
+Thus $sig_1 \approx sig_2$ is not an MGSE.
+By contradiction, there must be a $v$ such that $s[v]_I \approx t[v]_J \not\in E$.
+\end{proof}
+
+\noindent \textbf{Proposition \ref{erep}}
+Given the presentation $E_{rep}$ constructed from  $MGSE(E)$ as above with ordering $\tpre$, $E_{rep} \greq E$.
+\begin{proof}
+It is easy to check that all ground terms that are equivalent in $E_{rep}$ are equivalent in $E$, by the definition of $MGSE(E)$.
+To show the other direction, we will show by induction on $k$ that for all ground terms $s$ and $t$ such that $\|s\|,\|t\| \le k$, $s \approx_{E_{rep}} t$ if  $s \approx_E t$. 
+Base, $k=2$: Let $a,b \in \Sigma_0$ be distinct constants. 
+If  $a \approx_E b$, then $\ang{a} \approx \ang{b} \in MGSE(E)$, so $a \approx b \in E_{rep}$.
+Inductive step: Assume for all ground terms $s$ and $t$ such that $\|s\|,\|t\| \le k$, $s \approx_E t$ if and only if $s \approx_{E_{rep}} t$. 
+Let $s := f(s_1,\dots,s_l)$ and $t := g(t_1,\dots,t_r)$ be terms such that $\|s\|,\|t\| \le k+1$. 
+If $s$ and $t$ have the same signature in $E$, then $f = g$, $l = r$, and for all $i$, $s_i \approx_E t_i$, so $s \approx_{E_{rep}} t$ by the inductive hypothesis.
+Otherwise, $s\approx t$ is an instance of an $MGSE$, $sig_1 \approx sig_2$, with representative equation $u \approx v$ in $E_{rep}$.
+For each class $C$ such that $C = sig_1[i]$ (resp. $C = sig_2[i]$), the inductive hypothesis implies that $s|_i \approx_{E_{rep}} rep_C$ (resp. $t|_i \approx_{E_{rep}} rep_C$), since $\|rep_C\| \le \|s|_i\| \le k+1$ (resp. $\|rep_C\| \le \|t|_i\| \le k+1$) by the definition of $rep_C$ and $\tpre$.
+For each variable $x$ appearing at positions $I \subseteq \mathbb{N}$ in $sig_1$ and $I' \subseteq \mathbb{N}$ in $sig_2$, we can choose some $i \in I $ (resp. $i' \in I'$) and let $rep_x := s_i$ (resp. $rep_x := t_{i'}$).
+Using the inductive hypothesis, we can see that $\forall j \in I$, $s_j \approx_{E_{rep}} rep_x$ and $\forall j \in I'$, $t_j \approx_{E_{rep}} rep_x$.
+Therefore, we can construct terms $s' := f(s'_1,\dots,s'_l)$ and $t' := g(t'_1,\dots,t'_r)$ such that for all $j$, if $sig_1[j]$ (resp. $sig_2[j]$) is a class $C$, then $s'_i := rep_C$ (resp. $t'_i := rep_C$) and if $sig_1[j]$ (resp. $sig_2[j]$) is a variable $x$, then $s'_i := rep_x$ (resp. $t'_i := rep_x$).
+By this construction, we can see that $s \approx_{E_{rep}} s'$, $t \approx_{E_{rep}} t'$, and $s' \approx_{u \approx v} t'$.
+Since $u\approx v \in E_{rep}$, this means that $s \approx_{E_{rep}} t$.
+Therefore, $E_{rep} \greq E$. 
+\end{proof}
+
+
+\noindent \textbf{Lemma \ref{d_one_lemma}   } Let $E$ be any non-collapsing shallow presentation and let $s, t$ be terms in $T(\Sigma, X)$ such that $s \approx_E t$.
+Assume there is a $u \in T(\Sigma)$ such for every $s' \approx t' \in E$, $[u]\not\in D1(s') \cup D1(t')$. Let $I := D1P_{[u]}(s)$ and $J := D1P_{[u]}(t)$.
+Then $s[x]_I \approx_E t[x]_J$ for some $x \in X \backslash (Vars(s) \cup Vars(t))$. 
+\begin{proof}
+Assume $s = v_0 \approx_{e_0}^{p_0} v_1 \approx_{e_1}^{p_1} \dots v_{r-1} \approx_{e_{r-1}}^{p_{r-1}} v_{r} = t$.
+We will prove the lemma by induction on $r$. 
+Base $r=0$: $s = t$, so $s[x]_I = t[x]_J$.
+Induction step: Assume $s[x]_I \approx_E v_{r-1}[x]_K$, where $K := D1P_{[u]}(v_{r-1})$ %is the largest subset of $\mathbb{N}$ such that for each $k \in K$, $v_{r-1}|_k \in [u]$.
+We will show that $v_{r-1}[x]_K \approx_E t[x]_J$ for all possible cases of $p_{r-1}$:
+I) If $p_{r-1} \ge k$ for some $k \in K$, then $v_{r-1} |_k \approx_E v_r |_k \in [u]$. So $K = J$ and $v_{r-1}[x]_K = t[x]_J$.
+II) If $p_{r-1} \ge n \in \mathbb{N} / K$, then $v_{r-1}[x]_I \approx_{e_{r-1}}^{p_{r-1}} v_{r} t$.
+III) If $p = \epsilon$, then let $s' \approx t'$ equal $e_{r-1}$. 
+There is a $Y \subset X$ such that for each $k \in K$ and each $j \in J$, $s'|_k, t'|_j \in Y$ (otherwise $s'|_k$ or $t'|_j$ is in $[u]$, violating our hypothesis).
+By the definition of $\approx_E$, there is a substitution $sigma$ such that $v_{r-1} = s' \sigma$ and $t = t' \sigma$. 
+Note that this implies that no variable in $Y$ appears anywhere other than $K$ in $v_{r-1}$ and $J$ in $t$. 
+We can define $\sigma'$ such that $\sigma'(y) := x$ for each $y \in Y$ and $\sigma'(y) := \sigma(y)$ for all $y \in X \backslash Y$. 
+We then get that $s' \sigma' = v_{r-1}[x]_K$ and $t' \sigma' = t[x]_J$, so $v_{r-1}[x]_K \approx_E t[x]_J$.
+Thus $s[x]_I \approx_E t[x]_J$.
+\end{proof}
+
+
+\noindent \textbf{Lemma \ref{eq_d1}} For any non-collapsing shallow presentation $E$ such that $|EQ_G(E)| \ge |D1(E)| + 2d$, $\ec(E) \subseteq D1(E)$.
+\begin{proof}
+%We will show that each essential class must appear at depth 1 in $E$. \todo{define what it means for an essential class to "appear"}
+Assume for contradiction that the lemma isn't true. 
+Let $c \in \ec(E)$ be a class that doesn't appear at depth 1 in $E$.
+Since $c$ is essential, is must appear in the body of some $MGSE$ of $E$, $sig_1 \approx sig_2$.
+Choose a variable $x'$ not in $Vars(sig_1 \approx sig_2)$ and form the signature $sig'_1 \approx sig'_2$ by replacing each occurrence of $c$ in $sig_1 \approx sig_2$ with $x'$.
+We will show that $sig'_1 \approx sig'_2$ holds for $E$, which implies that $c$ is not essential.
+For each variable $x_i \not \in Vars(sig_1\approx sig_2)$, choose a new $c_i \in EQ_G(E) \backslash D1(E)$ and set $\sigma(x_i) := t_i$, where $t_i \in c_i$.
+%Set $\sigma(x') := t'$ for $t' \in c'$.
+We can choose these distinct $c_i$ classes since $|EQ_G(E)| \ge |D1(E)| + 2d$.
+Take any instance $s' \approx t'$ of $sig_1\sigma\approx sig_2\sigma$.  
+Since $s'\approx t'$ is ground and $sig_1 \approx sig_2$ holds for $E$, $s'\approx_E t'$.
+Let $I_0 := D1P_{c'}(s')$ and $J_0 := D1P_{c'}(t')$ and set $s_0 := s'[x']_{I_0}$ and $t_0 := t'[x']_{J_0}$.
+%Let $I'$ and $J'$ be the set of depth 1 positions of $c'$-instances in $s'$ and $t'$, respectively. 
+Since $c' \not\in D1(E)$, we can apply lemma \ref{d_one_lemma} to see that $s_0 \approx_E t_0$. \todo{can we fit this step in the step below?}
+Now for each $x_i \in Vars(sig_1 \approx sig_2)$ set $I_i := D1P_\sigma x_i (s)$m $J_i := D1P_\sigma x_i (s)$, $s_i := s_{i-1}[x_i]_{I_i}$, and $t_i := t_{i-1}[x_i]_{J_i}$.
+Since $\sigma x_i$ is not in $D1(E)$, we can apply lemma \ref{d_one_lemma} to see that $s_i \approx_E t_i$ for each $i$. 
+If there are $r$ variables in $sig_1 \approx sig_2$, then it is easy to check that $s_r \approx t_r$ is a maximally-generalized instance of $sig_1' \approx sig_2'$, and $s_r \approx_E t_r$. \todo{make sure maximally-generalized instance is defined}
+Thus, $sig'_1 \approx sig'_2$ holds for $E$, and $c$ is not essential by contradiction (see below this proof for an example).
+So $\ec(E) \subseteq D1(E)$.
+\end{proof}
+
+To understand the above lemma, take for example a presentation $E$ over the alphabet $\Sigma := \{ f:3, g:2, a:1, b:1, c:1 \}$.
+Assume that $E$ has $\ang{f,y,a,z}\approx\ang{g,a,y}$ as an MGSE and that $[a],[b],[c] \not\in D1(E)$. 
+We can generalize the signature equation to $\ang{f,y,x',z}\approx\ang{g,x',y}$ and consider the instance $f(b,a,c)\approx g(a,b) \in Th_G(E)$.
+We can then apply lemma \ref{d_one_lemma} to see that $f(b,x',c) \approx _E g(x',b)$, $f(x_1,x',c) \approx _E g(x',x_1)$, and $f(x_1,x',x_2) \approx _E g(x',x_1)$.
+This is a maximally-generalized instance of $\ang{f,y,x',z}\approx \ang{g,x',y}$, which must hold on $E$. 
+Thus $\ang{f,y,a,z}\approx \ang{g,a,y}$ must not be an MGSE, and we have a contradiction.\\\\
+
+
+
+\noindent \textbf{Theorem \ref{eqs_bound}} 
+Let $E$ be any non-collapsing shallow presentation over the alphabet $\Sigma$, and let $E_{rep}$ be the representative presentation formed from the essential classes of $E$. 
+Then $|E_{rep}| \le |\Sigma|^2(2d |E| + 4d)^{2d}$. 
+\begin{proof}
+Only essential terms and variables can appear at depth one in $E_{rep}$. 
+Therefore, since there are at most $|2d|$ variables in any equation in $E_{rep}$ and $|\Sigma|^2$ possible pairs of root symbols, we get that $|E_{rep}| \le |\Sigma|^2(|\ec(E)| + 2d)^{2d}$. % \todo{check that \ec(E) represents the essential classes of $E$}.
+It remains to be shown that $|\ec(E)| \le (2d |E| + 2d)$.
+This proof proceeds by cases depending on the size of $EQ_G(E)$, the equivalence classes of $E$ that contain at least one ground term.
+Case 1:  $|EQ_G(E)| < |D1(E)| + 2d$. Since all essential classes contain at least one ground term, $\ec(E) \subseteq EQ_G(E)$. Since at most $2d$ classes can appear at depth 1 per equation in $E$, $|D1(E)| \le 2d |E|$.
+Thus $ |\ec(E)|  \le |EQ_G(E)| < |D1(E)| + 2d \le 2d|E| +2d$.
+Case 2: $|EQ_G(E)| \ge |D1(E)| + 2d$. 
+By lemma \ref{eq_d1}, $\ec(E) \subseteq D1(E)$, so $|\ec(E)| \le |D1(E)|$.
+Since $|D1(E)| \le 2d|E|$, we get that $|\ec(E)| \le 2d|E|$.
+\end{proof}
+
+
+
+\noindent \textbf{Theorem \ref{size_bound}}
+Let $E$ be any non-collapsing shallow presentation over the alphabet $\Sigma$, and let $E_{rep}$ be the representative presentation formed from the essential classes of $E$. 
+Then $\|E_{rep}\| \le |E_{rep}|(\|E\|(2d)^{2d}+2)$. 
+\begin{proof}
+Assume $|D1(E)| + 2d \le EQ_G(E)$. 
+By lemma \ref{eq_d1}, $\ec(E) \subseteq D1(E)$. 
+Let $m' := max_{c \in \ec(E)} \{ minsize_E(c) \}$. 
+Since a term from every essential class must appear in $E$, we get that $m' \le \|E\|$.
+Each equation in $E_{rep}$ contains only variables and essential terms at depth 1, and all essential terms are the smallest in their equivalence class.
+Therefore, for each $s\approx t \in E_{rep}$,  $\|s\approx t\|\le 2d m'+2$.
+So $\|E_{rep}\| \le |E_{rep}|(2d m'+2)\le |E_{rep}|(\|E\|2d+2)$
+
+Assume $|D1(E)| + 2d > EQ_G(E)$ and let $\ahat{C} := EQ_G(E) \backslash D1(E)$.
+If $maxarg_{c \in \ec(E)} \{ minsize_E(c) \} \in D1(E)$, then we can apply the same reasoning above to bound $\|E_{rep}\|$.\todo{make sure this is smaller than other case}
+Otherwise, number the $c_i$ in $\ahat{C}$ such that $minsize_E(c_1) \le minsize_E(c_2) \le \dots$, and let $m := max_{c \in D1(E)} \{ minsize_E(c) \}$ (note $m \le \|E\|$).
+The value of $minsize_E(c_1)$ is maximized if its minimal size term contains only terms of size $m$ and has maximum arity.
+Therefore, $minsize_E(c_1)\le dm$.
+Likewise, for each $1 \le i \le |\ahat{C}|$, $minsize_E(c_i) \le d \cdot minsize_E(c_{i-1})$.
+So $minsize_E(c_{|\ahat{C}|}) \le d^{|\ahat{C}|} m \le d^{2d-1} \|E\|$.
+So $\|E_{rep}\| \le |E_{rep}|(2d^{2d} \|E\| + 2)$.
+\end{proof}
+
+
+

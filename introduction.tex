@@ -1,0 +1,48 @@
+Term rewriting systems are among the many formalisms capable of describing all turing-computable functions.  %\todo{I need to figure out my audience. Is this too simple/obvious to state? Should people be familiar with equational logic / grammatical inference / TRSs?}
+Lambda calculus, combinatory logic, and the theory of turing machines all have very natural representations as term rewriting systems. %\todo{cite something(s) here}
+Often, the order on rewrite rules is ignored, and rewrite rules are treated as sets of unordered equations (identities) between terms. 
+%After all, we don't the of equations in elementary algebra as having a direction.
+Algorithms such as the Knuth-Bendix algorithm \citep{knuth1983simple} are then applied to such sets of equations to create term rewriting systems with desirable properties.
+Because of the close connection between these equations and programs \citep{van1987logic, o1985equational}, applying the Knuth-Bendix algorithm to equations can be seen as a form of program-synthesis \citep{dershowitz1985synthesis}.
+Dershowitz and Reddy have also studied the inductive synthesis of programs using ordered-rewriting \citep{dershowitz1993deductive}.
+Although there has also been work on learning term-rewriting systems \citep{arimura2000learning, rao2006learnability}, there has been much less work on the learning of equational systems, themselves. 
+
+%\todo{SHOW THAT ANY CLASS OF EQUATION-PRESENTATIONS WITH SOLVABLE WORD PROBLEM IS LEARNABLE FROM POSITIVE/NEGATIVE EXAMPLES. This is actually easy.}
+
+The seemingly unrelated field of grammatical inference aims to learn formal languages from information about a target language, such as positive (resp. negative) examples which are in (resp. not in) the target language. %/todo{make this sentence less terrible}
+Grammatical inference was introduced by Gold in 1967, where he provided very simple classes of languages which are not learnable from positive examples \citep{gold67}
+One of the most important results from this field is a polynomial-time algorithm by Angluin for learning regular languages from membership and equivalence queries to an oracle \citep{angluin87}. 
+A membership query presents a string to the oracle and asks ``Is this string in the target language?" . 
+An equivalence query presents a hypothesis language to the oracle in the form of a deterministic finite automaton (DFA) and asks ``Is this the target language?" .
+If the answer is ``no", the oracle presents a counter-example from the symmetric difference of the hypothesis language and the target language. 
+The algorithm returns the canonical minimal DFA accepting the target language.
+This result has been generalized to a polynomial-time learning algorithm for rational tree languages \citep{sakakibara90}.
+
+The goal of the present work is to learn finite sets of equations over terms using examples or queries.
+We focus on exact learning, where the learned equational theory must be equivalent to the target equational theory. %\todo{need to state difference between presentations and entire theory} 
+Although we do not assume any background in grammatical inference, many of the techniques used in this paper are inspired by this field, and we will draw parallels between our methods and grammatical inference wherever possible.
+The basic analogy to keep in mind while reading this paper is that equational theories (the equivalence relation between terms) are like formal languages and equations between terms are like strings in the language.
+Analogous definitions of positive \& negative examples and membership \& equivalence queries can be applied to learning equational theories.
+
+Of course, if we allow for examples to be any equations, then learning becomes easy. 
+Just use all positive equations as the hypothesis equational presentation. %todo%todo{define presentation}
+Therefore, we restrict ourselves to studying examples and queries on only ground equations (i.e., equations without variables).
+We can think of these ground equations as instantiations of non-ground equations in the ``real world". \todo{Find an example of what I'm talking about}
+This method, however, has the downside that we cannot distinguish between two different equational theories that agree on ground terms.
+For example, given alphabet $\Sigma := \{f:1, a:0\}$ %todo{define this notation somewhere (before this sentence?)}, 
+consider the equational theories generated 
+%\todo{define generated}
+by $E_0 := \{ f(f(a)) \approx f(a)\}$ and $E_1 := \{ f(x) \approx f(y) \}$ for variables $x$. Both presentations agree on all ground equations, but the equation $f(x) \approx f(y)$ is provable in $E_1$ but not $E_0$. 
+Therefore we only require that the learned equational theory be equal to the target theory on all ground terms.% (i.e., is \emph{ground equivalent} to the target theory). %\todo{is this only relevant if the ground theory is trivial?}
+
+The paper presents polynomial-time algorithms for the exact learning of \emph{non-collapsing shallow theories}, which are presentable by equations with variables appearing only at depth 1 .
+Shallow theories, which are presentable by equations with variables appearing at depth 0 or 1, were first introduced by Comon, Haberstrau, and Jouannaud as a non-trivial class of equational theories with a decidable word problem \citep{comon1992decidable, comon1994syntacticness}. 
+Later work by Niewenhuis showed that the word problem for shallows theories is solvable polynomial time \citep{nieuwenhuis96}.
+It seems unlikely that there could exist a polynomial-time learning algorithm for a class of theories with no polynomial algorithm for the word problem. 
+Therefore, the set of non-collapsing shallow theories is among the most expressive classes of theories for which an efficient learning algorithm might reasonably exist. 
+
+%Here are some basic analogies to keep in mind while reading this paper:
+%Learning an equational theory (the equivalence relation between terms) is like learning a formal language.
+%An example of an equation that is in the theory is like 
+
+%The goal of the present work is to learn finite sets of equations on terms from information on ground equations.

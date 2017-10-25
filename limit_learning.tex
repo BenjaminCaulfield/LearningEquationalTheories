@@ -1,0 +1,149 @@
+This section investigates the possibility of learning non-collapsing shallow theories in the limit from ground examples. 
+
+In the \emph{learning in the limit} model, first presented in \cite{gold67}, the learner is trying to learn a target concept $L$ from a concept class $C \subset 2^X$ for some space $X$ of elements. 
+The learner is given a sequence of examples $e_1, e_2, \dots$.
+When learning from \emph{positive examples}, these examples are drawn from the target set (i.e., \emph{language}) $L$, with the guarantee that every $x \in L$ will eventually be seen in some example.
+When learning from \emph{negative examples}, each $e_i$ is of the form $(x_i, b_i)$ where the $b_i$ indicates whether $x_i$ is in $L$, and every $x \in X$ will eventually be seen in some example.
+
+After each new example $e_t$, the learner is asked to give a hypothesis $L_t$. 
+It is said to learn in the limit if the learner eventually converges to the target concept, $L$. 
+
+In this paper, $X$ is the set $T(\Sigma)$ of all ground equations, and the concepts $L$ are theories over ground terms. \todo{make sure "theory over ground terms" is defined}
+
+\subsection{Learning from Positive Examples}
+%As a simple first result, we will see that learning non-collapsing shallow theories is not possible from positive examples.
+
+Learning ground equational presentations in the limit from positive examples is easy. 
+After seeing some set of positive ground examples $E$, simply use $E$ as the hypothesis presentation. %todo{define (hypothesis) presentation}
+
+However, when non-ground equations are allowed, even very simple classes of equational theories are no longer learnable from positive examples. 
+A simple corollary of Gold's theorem shows that the set of equational theories that can be presented by ground equations and (optionally) the equation $f(x,y) \approx f(y,x)$ is not learnable from positive examples.  %todo{should we use $\approx$ or $=$?}
+Since these are all non-collapsing shallow theories, this implies that the entire class of non-collapsing shallow theories is not learnable from positive examples.
+
+We restate Gold's theorem below \cite{gold67}:
+
+\begin{theorem}
+Let $C' := \{L_{\infty}, L_0, L_1, \dots \}$ be a set of formal languages such that for all $i$, $L_i \subset L_{i+1}$ and $L_\infty := \bigcup_i L_i$. 
+Then no class $C$ containing $C'$ is learnable from positive examples.
+\end{theorem}
+
+%A simple proof of this theorem can be found in \citep{johnson04}.
+
+
+We will now construct a set $C'$ of non-collapsing shallow theories that fits the above conditions.
+Let $\Sigma := \{a:0, b:0, f:2\}$. 
+For each $i \in \mathcal{N}$, let $E_i := \{ f(s,t) \approx f(t,s) \ | \ depth(s),depth(t) \le i\}$ and let $L_i := Th_G(E_i)$. %todo{Is "Th(E)" good notation? Define it in background} %\{ s \approx_{E_i} t \ | \ s,t \in T(\Sigma) \}$
+Let $L_\infty := Th_G(\{f(x,y) \approx f(y,x)\})$. 
+We can see that $C' := \{L_\infty, L_0, L_1, \dots \}$ satisfies the conditions of the above theorem.
+Therefore, no class whose theories can be presented using only ground equations and the equation $f(x,y) \approx f(y,x)$ can be learned from positive examples.
+
+
+\subsection{Learning from Positive and Negative Examples}
+
+This subsection presents an algorithm for learning non-collapsing shallow theories in the limit from examples of positive and negative ground-equations. 
+The algorithm takes a set $S^+$ of positive examples and $S^-$ of negative examples and returns a hypothesis in time polynomial in $\|S^+\| + \|S^-\|$.
+The hypothesis is consistent with all examples. 
+As more examples are added, the algorithm will eventually converge on the presentation $E_{rep}$ defined with respect to an ordering $\tpre$.
+
+It is fairly easy to create an algorithm that creates a consistent hypothesis in polynomial time and learns the theory in the limit. 
+Say enumerate all non-collapsing shallow presentations, $E_1, E_2, \dots$, in order of increasing presentation size, $\|E_i\|$.  
+Given some examples $(S^+, S^-)$ such that $|S^+| + |S^-| = n$, the algorithm can check if there is an $i < n$ such that $E_i$ is consistent with $(S^+, S^-)$.
+If so, the algorithm returns the first such $E_i$. 
+If not, the algorithm returns $S^+$. 
+To check if $E_i$ is consistent with $(S^+, S^-)$, the learner checks that $s \approx_{E_i} t$ for each $s \approx t \in S^+$ and it checks that $s \not\approx_{E_i} t$ for each $s \approx t \in S^-$. 
+This takes polynomial time, since the size of each $E_i$ for $i < n$ is less than polynomial in $n$ and checking provability of any $s \approx t$ in a non-collapsing theory takes polynomial time. 
+Therefore, finding a consistent hypothesis takes polynomial time in the input size. 
+
+However, this algorithm is far from practical. 
+There are at $\Omega(2^n)$ presentations of size less than $n$. 
+So, this learning process will require exponentially many examples to learn most theories. 
+The rest of this sections presents an algorithm that requires polynomially many good examples before converging on a solution. \todo{the transition sounds odd, it "good" clear?}
+
+
+
+
+
+Let $E$ be a non-collapsing shallow presentation of the target theory defined over the alphabet $\Sigma$.\todo{should we give this definition each section, or state it once earlier?}
+Let $\tpre$ be an ordering on terms such that for all terms $s$ and $t$, $\|s\| < \|t\|$ implies $s \tpre t$. 
+Given the examples $(S^+, S^-)$, the hypothesis $\ahat{E}$ is constructed as follows: \todo{use \ahat{E} for hypothesis?}
+\begin{itemize}
+\item A set $A$ of essential terms is found. (This is described in more detail in the next subsection)
+\item The algorithm creates a set $B$ of non-collapsing shallow equations with only terms from $A$ and variables at depth 1. 
+\item For each equation $e \in B$, the algorithm checks whether $\ahat{E} \cup \{e\} \cup S^+ \vdash u \approx v$ for any $u \approx v \in S^-$. If not, $e$ is added to $\ahat{E}$.
+\item For all $e,e' \in \ahat{E}$ such that $e \prec e'$, $e$ is removed from $\ahat{E}$
+\item The algorithm returns the hypothesis $\ahat{E} := \ahat{E} \cup \{ s\approx t \in S^+\; | \; s \not\approx_{\ahat{E}} t \}$ 
+\end{itemize}
+
+This algorithm takes inspiration from the RPNI algorithm for learning regular languages from positive and negative examples \citep{oncina1992inferring}.
+In particular, both algorithms try to generalize as much as possible without contradicting the known negative examples. 
+
+
+
+\subsubsection{Identifying Essential Terms}
+
+We say that the terms $s$ and $t$ are \emph{provably distinct } if there is a  $u \approx v \in S^-$ such that $s \approx_{S^+} u$ and $t \approx_{S^+} v$. %\todo{fix this definition to have S+ and S-?}
+
+We say a ground signature $f(s_1,\dots,s_k) \approx g(s_{k+1},\dots,s_{k+r})$ is \emph{classified} if for every $s_i$ and $s_j$, either $s_i \approx_{S^+} s_j$ or $s_i$ is provably distinct from $s_j$. 
+
+
+Let $s \approx t$ be a classified equation such that $s \approx_{S^+} t$, and let $u$ be a term with $I := D1P_{[u]}(s)$ and $J := D1P_{[u]}(t)$.
+If there is a $v$ such that $s[v]_I \approx t[v]_J$ is classified and $s[v]_I$ is provably distinct from $t[v]_J$, then $u$ is an essential term by lemma \ref{ess_id}. 
+ \todo{do we want to include this in a lemma? or add it to the general nc section?}
+
+By finding pairs of equations $s \approx t$ and $s[v]_I \approx t[v]_J$ as above, the algorithm assembles a set $A'$ of essential terms.
+Since $A'$ might contain multiple terms from the same equivalence class, a new set $A$ is constructed of provably distinct terms is constructed as follows:
+Set $A := \emptyset$. 
+In increasing order of $\tpre$, take each $s \in A'$. 
+If $s$ is provably distinct from each element of $A$, then add $s$ to $A'$.
+
+
+\subsubsection{Characteristic Samples}
+
+A \emph{characteristic sample} is a pair of sets $(S'^{+}, S'^{-})$ such that whenever $S'^{+} \subseteq S^+$ and $S'^{-} \subseteq S^-$, the algorithm will yield a correct hypothesis.
+We will show that the algorithm admits a characteristic sample for every non-collapsing shallow theory.
+This implies that the algorithm will learn non-collapsing shallow theories in the limit. 
+
+Note that the algorithm will always yield the correct solution if there is only one equivalence class.% so $(\emptyset, \emptyset)$ .
+Therefore, we can assume that there are at least two equivalence classes in the target theory.
+
+We will now construct the characteristic sample $(S'^{+}, S'^{-})$ for the non-collapsing shallow theory $Th_G(E)$ with order $\tpre$.
+As we describe the construction, we will show that any sample containing the characteristic sample will cause the algorithm to yield the hypothesis $E_{rep}$.
+
+For each essential class $C$, recall that $rep_C$ is the minimal element of $C$ with respect to $\tpre$. 
+
+For each $rep_C$, find an MGSE, $sig_1 \approx sig_2$, $C$ in it's body and let $I$ and $J$ be the positions of $C$ in $sig_1$ and $sig_2$, respectively. 
+For a $v \not\in C$, find a pair of equations $s \approx t$ and $s[v]_I \approx t[v]_J$ such that $s \approx t \in Inst(sig_1 \approx sig_2)$ and $s[v]_I \not\approx_E t[v]_J$.\todo{is it clear why this pair must exist?}
+Add $s \approx t$ to $S^+$ and add $s[v]_I \approx t[v]_J$ to $S^-$.
+This guarantees that the algorithm will add $rep_C$ to $A'$.
+
+Add the set $\{ rep_C \approx rep_{C'} \; | \; C,C' \in \ec(E) \}$ to $S'^-$.
+This guarantees that the set $A$ will contain all $rep_C$ terms for each $C \in \ec(E)$.
+No other essential terms will added to $A$, since they must be in some $C \in \ec(E)$ and thus cannot be provably distinct from $rep_C$.
+Therefore, the algorithm will find the set $A := \{ rep_C \; | \; C \in \ec(E) \}$.
+
+For each signature equation $sig_1 \approx sig_2$ that has only variables and essential classes in its body and does not hold for $E$, find an equation $s \approx t \in Inst(sig_1 \approx sig_2)$ such that $s \not\approx_E t$ and add $s \approx t$ to $S^-$.
+Thus, the representative equation for $sig_1 \approx sig_2$ will not be added to $\ahat{E}$.
+
+Every representative equation in $E_{rep}$ will be added to $\ahat{E}$, since there can be no equation in $S^-$ to contradict it.
+By the definition of $E_{rep}$, all other equations that hold for $E$ are instances of $E_{rep}$. 
+Therefore, the algorithm will return $E_{rep}$ as the final hypothesis.
+
+
+\subsubsection{Examples}
+
+\begin{example}
+Let $\Sigma := \{ f:1, a:0 \}$, $S^+ := \emptyset$, and $S^- := \{ f(a) \approx a \}$. 
+There are no classified equations, so no essential terms are identified.
+The algorithm tries to add $f(x) \approx a$, but fails since it can be used to prove $f(a) \approx a$.
+It then tries $f(x) \approx f(y)$ and succeeds. 
+The hypothesis presentation is therefore $\ahat{E} := \{ f(x) \approx f(y) \}$.
+\end{example}
+
+\begin{example}
+Let $\Sigma := \{ f:1, a:0, b:0 \} $,  $S^+ := \{ f(a) \approx f(b) \}$, and $S^- := \{ a\approx b, f(f(a))\approx f(a), f(f(a))\approx f(b), f(a)\approx b, f(a)\approx a \}$. 
+The equations, $f(a)\approx f(b)$, $f(f(a))\approx f(b)$, and $f(a) \approx f(f(a))$ are classified.
+They are used to show that both $a$ and $b$ are essential terms, since $f(a) \not\approx_E a$ and $f(a) \not\approx_E b$.
+These terms $a$ and $b$ are provably distinct.
+Thus, the algorithm tries to add the following equations: $f(a) \approx f(b)$ (yes), $f(a) \approx a$ (no), $f(a) \approx b$ (no), $f(a) \approx f(x)$ (no), $f(b) \approx a$ (no), $f(b) \approx b$ (no), $f(b) \approx f(x)$ (no), $f(x) \approx f(y)$ (no).
+The hypothesis presentation is therefore $\ahat{E} := \{f(a) \approx f(b) \}$.
+\end{example}

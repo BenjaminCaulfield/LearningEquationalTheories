@@ -1,0 +1,104 @@
+
+%{\bf Term Rewriting Systems.}~\cite{baader1999term} 
+\subsubsection*{Terms and Substitutions}
+We follow the book by Baader and Nipkow \citep{baader1999term}. 
+For clarity, we will use $:=$ when defining new objects and $=$ to denote that two objects are equivalent in the normal sense. \todo{is this clear?} 
+A \emph{signature} (or \emph{ranked alphabet}) $\Sigma$ consists of a set of \emph{function} symbols with an associated \emph{arity}, a
+non-negative number indicating the number of arguments.  
+For example $\Sigma := \{ f:2, a:0, b:0\}$ consists of binary function symbol $f$ and constants $a$ and $b$.
+For any arity $n \ge 0$, we let $\Sigma^{(n)}$ denote the set of function symbols with arity $n$ (the $n$-ary symbols). 
+We will refer to the $0$-ary function symbols as \emph{constants}. 
+
+For any signature $\Sigma$ and set of \emph{variables} $X$ such that $\Sigma \cap X = \emptyset$, we define the set $T(\Sigma, X)$ of $\Sigma$-terms over $X$ inductively as the smallest set satisfying: \todo{make sure papers uses $X$ and not $Vars$}
+\begin{itemize}
+\item $\Sigma^{(0)},X \subseteq T(\Sigma, X)$
+\item  For all $n \ge 1$, all $f \in \Sigma^{(n)}$, and all $t_1, \dots, t_n \in T(\Sigma, X)$, we have $f(t_1,\dots,t_n) \in  T(\Sigma, X)$.
+\end{itemize} 
+
+Unless otherwise stated, we will use variations of $a$, $b$, and $c$ to denote constants, $x$, $y$, and $z$ to denote variables, and $f$, $g$, and $h$ to denote non-constant function symbols.
+
+We define the set of \emph{ground terms} of $\Sigma$ to be the set $T(\Sigma, \emptyset)$, which we will sometimes write $T(\Sigma)$.
+
+The set of \emph{positions} of a term $t$, denoted $Pos(t)$, is a set of strings over the alphabet of positive integers. 
+It is inductively defined as follows:
+\begin{itemize}
+\item If $t \in X \cup \Sigma^{(0)}$, then $Pos(t) := \{ \epsilon \}$
+\item If $t = f(t_1, \dots, t_n)$, then $Pos(t) := \{\epsilon\}  \cup \bigcup_{i=1}^{n} \{ip \mid p \in Pos(t_i) \}$ 
+\end{itemize}
+
+Here, $\epsilon$ represents the empty string and is called the \emph{root position} of $t$.
+For positions $p$ and $q$, we say $p \le q$ if there exists a position $p'$ such that $pp' = q$.  
+We say $p$ is parallel to $q$, denoted $p \| q$, if $p \not\le q$ and $q \not\le p$. 
+
+%The size of a term $t$, denoted $\|t\|$, is $|Pos(t)|$. 
+For $p \in Pos(t)$, the subterm of $t$ at position $p$, denoted $t|_p$ is defined by:
+\begin{itemize}
+\item $t|_\epsilon := t$ 
+\item $t|_{ip'} := t_i|_{p'}$, if $t = f(t_1, \dots, t_n)$
+\end{itemize}
+
+For $p \in Pos(t)$, the term $t[s]_p$ is created by replacing the subterm at position $p$ with $s$. In other words,
+\begin{itemize}
+\item $t[s]_\epsilon := s$
+\item $f(t_1, \dots, t_n)[s]_{ip'} := f(t_1, \dots, t_i[s]_{p'}, \dots, t_n)$
+\end{itemize}
+
+This can be extended to a set $I \subset Pos(t)$ of parallel positions, so $t[s]_I$ replaces each term at each $i \in I$ with $s$.
+
+An \emph{equation} is an ordered-pair of terms $s$ and $t$, written $s \approx t$. 
+Given a set $E$ of equations, new equations can be derived using the rules of \emph{equational logic} as follows:
+\[ \vdash s \approx s \mbox{ (reflexive)}\]
+\[s \approx t \vdash t \approx s \mbox{ (symmetric)}\]
+\[s \approx t, t \approx u \vdash s \approx u \mbox{ (transitive)}\]
+\[s_1 \approx t_1, \dots, s_k \approx t_k \vdash f(s_1,\dots,s_k)\approx f(t_1,\dots,t_k) \mbox{ (congruence)}\]
+\[s \approx t \vdash s\sigma \approx t\sigma \mbox{ (substitution)}\]
+\todo{find better way to align these}
+
+
+Let $Th(E)$ be the set of equations, $s \approx t$, such that $E \vdash s \approx t$. 
+Moreover, let $Th_G(E)$ be the set of ground equations in $Th(E)$. 
+We say two sets of equations, $E$ and $E'$, are \emph{ground-equivalent}  (written $E \greq E'$) if $Th_G(E) = Th_G(E')$.
+A presentation of $T$ is any finite set $E$ of equations such that $Th(E) = T$. \todo{do same for $Th_G(E)$}
+
+Alternatively, we say that $s \approx_e^p t$ if there is a substitution $\sigma$, an equation $e := l \approx r$, and a position $p \in Pos(s)$ such that $s|_p = l\sigma$ and $s[r\sigma]_p = t$.
+The equation $s \approx_e t$ denotes that there is a $p \in Pos(s)$ such that $s \approx_e^p t$.
+We can think of this as replacing the subterm $l\sigma$ at position $p$ in $s$ with $r\sigma$.
+We write $s \approx_E t$ if there is a finite sequence of equations and positions $(e_0, p_0), \dots, (e_k, p_k)$ such that $s = v_0 \approx_{e_0}^{p_0} v_1 \approx_{e_1}^{p_1} \dots \approx_{e_k}^{p_k} v_{k+1} = t$.
+It holds that $s \approx_E t$ if and only if $E \vdash s \approx t$.
+
+For example, given the presentation $E := \{ e_1 := f(x)\approx f(y), e_2 := g(f(a)) \approx g(b) \}$, we can prove $g(f(b))\approx g(b)$ by the derivation $g(f(b)) \approx_{e_1}^1 g(f(a)) \approx_{e_2}^\epsilon g(b)$.
+Given the presentation $E := \{ e_1 := f(x,y) \approx f(x,x), e_2 := f(x,y)\approx f(y,x) \}$, we can prove $f(f(a,b),f(b,a)) \approx f(f(b,a), b)$ by the derivation $f(f(a,b),f(b,a)) \approx_{e_2}^1 f(f(b,a),f(b,a)) \approx_{e_1}^\epsilon f(f(b,a),b)$.
+
+
+Let $EQ(E)$ denote the set of equivalence classes induced by $E$.
+We use $[t]_E$ to denote the equivalence class of $E$ containing the term $t$ and $[t]$ when $E$ is implicitly known. 
+A \emph{ground equivalence class} contains at least one ground term, and $EQ_G(E)$ is the set of ground equivalence classes of $E$.
+
+We use $Vars(\cdot)$ to denote the set of variables occurring in any object, such as a term, equation, or set of equations.
+
+We define the subterms of a term recursively by: 
+\[\Subterms(g(s_1,\dots,s_k)) :=  \\ \{g(s_1,\dots,s_k)\} \cup \bigcup_i \Subterms(s_i)\]
+We lift the definition to sets $S$ of terms: 
+\[ \Subterms(S) := \bigcup_{s \in S}\Subterms(s) \]
+We say that a set $S$ of terms is \emph{subterm-closed} if $\Subterms(S) = S$. 
+We say that $s$ \emph{appears} in $t$ (resp. $t \approx u$) if $s \in \Subterms(t)$ (resp. $\Subterms(t) \cup \Subterms(u)$)
+
+The size of a term is defined by $\| \cdot \|$ so that $\| f(s_1,\dots,s_k) \| := 1 + \Sigma_i \| s_i \|$ and $\| a \| := 1$ for all symbols $f$ of arity $k$, constants $a$, and terms $s_1, \dots, s_k$.
+This can be extended to equations, sets of terms, and sets of equations in the natural way.
+
+The \emph{depth} of a term $t$ is the length of the largest $p \in Pos(t)$.
+A term $s$ (resp. equivalence class $c$) \emph{occurs} in $t$ at depth $d$ if there is a $p \in Pos(t)$ of length $d$ such that $t|_p = s$ (resp. $s \in C$ such that $t|_p = s$).
+A term $t$ is \emph{shallow} if no variable occurs at a depth greater than or equal to 2. 
+An equation $s \approx t$ is shallow if $s$ and $t$ are shallow, and a set of equations is shallow if all of its equations are shallow.
+For example, $f(h(h(a)),x,b) \approx x$ and $g(x,y,b) \approx h(x)$ are shallow, while $f(h(x),a) \approx x$ and $h(h(x)) \approx h(x)$ are not.
+A theory $T$ is shallow if there exists a shallow presentation $E$ such that $Th(E) = T$. \todo{how do we call $Th_G(E)$ shallow?}
+
+An equation $s  \approx  t$ is collapsing if $t \in X$ and $t \in Subterms(s)$.
+A set of equations is collapsing if it contains at least one collapsing equation, and any theory is collapsing if each of it's presentations is collapsing.   %, and it is non-collapsing
+Any equation, set of equations, or theory is non-collapsing if it is not collapsing.
+Non-collapsing shallow theories can be presented by equations where variables only appear at depth 1.
+
+For any equivalence class $c$, and any term $s$, we use $D1P_c(s)$ to denote the set of depth 1 positions of terms from $c$ in $s$.
+In other words, $D1P_c(s)$ is the largest  subset of  $\mathbb{N}$ such that for each $i \in  D1P_c(s)$, $s|_i \in c$. 
+Define $D1P_x(s)$ analogously for any variable, $x$. 
+Let $D1(E)$ be the set of $E$ equivalence classes that appear at depth 1 in any presentation $E$.

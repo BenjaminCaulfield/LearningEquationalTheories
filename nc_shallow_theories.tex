@@ -1,0 +1,141 @@
+%Learning Shallow Systems
+This section investigates some properties of non-collapsing shallow theories that will be useful in the following sections.  
+We introduce a representation for non-collapsing shallow theories known as \emph{maximally-generalized signature equations}.
+We will show that this representation is canonical for ground-equivalent theories up to a renaming of variables.
+This representation can be used to determine a canonical presentation for non-collapsing shallow theories. 
+Assuming a fixed signature, we will also show that the size of this representation is polynomial in the size of any ground-equivalent presentation. 
+
+Throughout this section, unless otherwise stated, we will assume that every theory is non-trivial. 
+This means that there are at least two ground terms that are equivalent and at least two ground terms that are not equivalent. %\todo{odd sentence}. 
+%The algorithm can query the presentations $\emptyset$ and $\{x \approx y\}$ to the oracle in order to rule out the trivial cases.  \todo{ do we want to assume this? We need to alter it to now talk about algorithms, as well.}
+
+The proofs for the statements made in this section are given in an appendix at the end of the paper.  
+
+
+\subsection{Signature Equations}
+Given an equational theory $E$, a \emph{signature}, \emph{sig} (defined over $E$), consists of a function symbol $f \in \Sigma_k$ and a set of equivalence classes $C_1, \dots, C_k \in EQ_G(E)$, represented $\ang{f,C_1,\dots,C_2}$. %$[s_1]_E, \dots, [s_k]_E$. 
+We call $f$ the \emph{head} and $C_1, \dots, C_k$ the \emph{body} of the signature.%\todo{we use head once below} of the signature (written $f = head(sig)$)
+ We write $sig[i]$ for each $C_i$. %\todo{does this 'written' make sense?}
+
+An \emph{instance} of \emph{sig} is a term $f(s_1,\dots,s_k)$, where for each $i$,  $s_i \in C_i$.
+We write $\inst{sig}$ to represent the set of instances of $sig$.
+We may also represent \emph{sig} by $\ang{f,s_1,\dots,s_k}$ when $f(s_1,\dots,s_k) \in \inst{sig}$, since each $s_i$ acts as a representative element of $C$. 
+%\todo{do we need to define signatures, or should we just jump to extended signatures?}
+
+An \emph{extended signature}, $sig'$ is defined analogously, but may contain variables in place of equivalence classes.
+Moreover, instances of extended signatures may replace like variables with like terms.
+When an instance contains all the same variables as its signature, it is a maximall-generalized instance
+For example $\ang{f,a,x,x}$ and $\ang{f,[a]_E,x,x}$ are both representations of the same extended signature, and $f(a,x,x)$ and $f(a,b,b)$ are instances of this signature, though $f(a,x,x)$ is the only maximally-generalized instance. %\todo{do we want to let instances allow for substitutions as well?}
+%Extended signatures may also contain a single variable, such as $x$, written $\ang{x}$.
+Given two signatures, $sig_1$ and $sig_2$, we define the order $\preceq$ such that  $sig_1 \preceq sig_2$ if $\inst(sig_1) \subset \inst(sig_2)$.
+We say $sig_1 \prec sig_2$ if $sig_1 \prec sig_2$ but $sig_2 \not\prec sig_1$.
+%\todo{define representative instance vs instance (or some other names)}
+For example, $\ang{f,a,b,b} \prec \ang{f,a,x,x}$.
+Likewise, $\ang{f,a,x,b} \not\prec \ang{g,a,x,b}$ since they have different heads, and $\ang{f,a,x,y} \not\prec \ang{f,x,x,y}$. %\todo{say why}
+If $sig_1 \prec sig_2$, we say that $sig_2$ is more general than $sig_1$.
+For a set $I$ of indices, we write $sig[c]_I$ to replace each element at each $i \in I$ with $c$.
+
+A \emph{signature equation} is an pair of extended signatures, written $sig_1 \approx sig_2$ for signatures $sig_1$ and $sig_2$.
+An \emph{instance} of a signature equation $sig_1  \approx  sig_2$ is an equation $s_1 \approx s_2$, where $s_1$ is an instance of $sig_1$ and is an instance $s_2$ of $sig_2$.
+The signature equation $sig_1 \approx sig_2$  (defined over $E$) \emph{holds} on $E$ if for every ground instance $s_1 \approx s_2$ of $sig_1 \approx sig_2$, $s_1 \approx_E s_2$.
+A \emph{maximally generalized} signature equation (MGSE) is a signature equation $sig_1 \approx sig_2$ defined over $E$ such that for all signatures $sig'_1$ and $sig'_2$ such that $sig_1 \preceq sig'_1$ and $sig_2 \preceq sig'_2$, there is an instance $s'_1 \approx s'_2$ of the equation such that $s'_1 \ne_E s'_2$. 
+The set of maximally generalized signature equations of a theory $E$ is written $MGSE(E)$.
+Every pair of equivalent ground terms is an instance of some MGSE.
+Note that for any presentation $E'$, it holds that $E \greq E'$ if and only if $MGSE(E) = MGSE(E')$ (up to a renaming of variables). %\todo{should I bother to write out this proof? Or state this in a proposition?}
+%Therefore, we can try to learn an equational theory by learning its MGSE's
+
+
+
+An \emph{essential class} of a presentation $E$ is an equivalence class that appears in the body of some signature in $MGSE(E)$. %\todo{should we consider all constants to be essential classes?}
+For example, if $E := \{ f(g(a),x) \approx b\}$, then $[g(a)]$ and $[b]$ are essential classes, since $\ang{f,g(a),x} \approx \ang{b}$ are MGSEs.
+Then the only MGSE of $E := \{ f(a) \approx b \}$ is $\ang{f,a} \approx \ang{b}$, so its only essential class is $[a]$, since $b$ is in the head, not the body, of the equation.
+The set  $E := \{ a \approx b, f(x) \approx g(x) \}$ has MGSEs $\ang{f,x} \approx \ang{g,x}$ and $\ang{a} \approx \ang{b}$, and it has no essential classes.
+Lastly, the set $E:= \{ f(x,y) \approx f(y,x), f(a,x)\approx b \}$ has MGSEs $\ang{f,x,y} \approx \ang{f,y,x}$, $\ang{f,a,y}\approx \ang{b}$, and $\ang{f,x,a} \approx \ang{b}$.
+
+Let $\ec(E)$ denote the set of of essential classes in $E$.
+We will use $\ec$, when $E$ is clear from context. 
+
+The following lemma will be useful to identify essential terms.
+
+\begin{lemma}
+\label{ess_id}
+Let $s \approx t \in Th_G(E)$ and let $u$ be a term with $I := D1P_{[u]}(s)$ and $J := D1P_{[u]}(t)$.
+Then  $u$ is an essential term if and only if there is a $v$ such that $s[v]_I \approx t[v]_J \not\in Th_G(E)$.
+\end{lemma}
+
+
+
+\subsection{The Canonical Representation $E_{rep}$}
+Let $\tpre$ be any total ordering on terms such that for any terms $s$ and $t$, $\|s\| < \|t\|$ implies $s \tpre t$.
+For a fixed $\tpre$, we will see how to construct a presentation, $E_{rep}$, of $E$ that is canonical up to a renaming of variables.
+Only variables and essential terms appear at depth 1 in any equation in $E_{rep}$.
+
+For each $C \in \ec$, let the \emph{representative term} of $C$, called $rep_C$, be minimal ground term in $C$ with respect to $\tpre$ . %\todo{should every subterm also be representative?}
+Take any $sig_1 \approx sig_2 \in MGSE(E)$, where $sig_1 := \ang{f,u_1,\dots,u_k}$ and $sig_2 := \ang{g,u_{k+1},\dots,u_{k+r}}$ and for each $i$, $u_i \in \ec \cup X$. 
+We define the \emph{representative equation} of $sig_1 \approx sig_2 \in MGSE(E)$ to be the equation $f(u'_1,\dots,u'_k) \approx g(u'_{k+1},\dots,u'_{k+r})$, where $u'_i := u_i$ if $u_i \in X$ and $u'_i := rep_C$ if $u_i \in C \in \ec$. 
+Let $E_{rep}$ be the set of representative equations of $MGSE(E)$.
+The proof that $E_{rep} \greq E$ is given in the following proposition.
+
+\begin{proposition}
+\label{erep}
+Given the presentation $E_{rep}$ constructed from  $MGSE(E)$ as above with ordering $\tpre$, $E_{rep} \greq E$.
+\end{proposition}
+
+%Note that the above proof also suggests a polynomial time algorithm to find a derivation from $s$ to $t$ in $E_{rep}$. \todo{make sure derivation is defined}
+
+
+\subsection{Bounding the Size of $E_{rep}$}
+
+We have seen how to construct a canonical presentation $E_{rep}$ from the essential classes $\ec$ of a presentation $E$.
+ But what if $\|\ec\|$ is very large?
+ This section gives a polynomial bound for $\|\ec\|$ in terms of the size of any ground-equivalent non-collapsing shallow presentation $E$.
+ We use this to give polynomial bounds for $|E_{rep}|$ and $\|E_{rep}\|$ in terms of $|E|$ and $\|E\|$, respectively.
+
+\begin{lemma}
+\label{d_one_lemma}
+Let $E$ be any non-collapsing shallow presentation and let $s, t$ be terms in $T(\Sigma, X)$ such that $s \approx_E t$.
+Assume there is a $u \in T(\Sigma)$ such for every $s' \approx t' \in E$, $[u]\not\in D1(s') \cup D1(t')$. % and every $n \in \mathbb{N}$, $s' |_n \not \approx_E u$ and $t' |_n \not \approx_E u$. \todo{is the last statement redundant with t' ?} \todo{should we give a name to what $u$ is?} \todo{just say $u$ doesn't appear at depth 1 in E}
+Let $I := D1P_{[u]}(s)$ and $J := D1P_{[u]}(t)$.
+Then $s[x]_I \approx_E t[x]_J$ for some $x \in X \backslash (Vars(s) \cup Vars(t))$. 
+\end{lemma}
+
+
+\begin{lemma}
+\label{eq_d1}
+For any non-collapsing shallow presentation $E$ such that $|EQ_G(E)| \ge |D1(E)| + 2d$, $\ec(E) \subseteq D1(E)$.
+\end{lemma}
+
+
+The condition that $|EQ_G(E)| \ge |D1(E)| + 2d$ is in fact necessary for the above lemma, though the inequality isn't necessarily tight.
+Specifically, if there is a non-collapsing shallow $E$ such that $|D1(E)| + 2d \ge |EQ_G(E)|$, then it is not necessary that $\ec(E) \subseteq D1(E)$.
+For example, let $\Sigma := \{ f:2, a:0, b:0 \}$ and let $E := \{ f(x,a)\approx a, f(x,x)\approx a, f(x,f(a,b))\approx a, f(f(a,b),x)\approx a\}$, so $D1(E) = \{ [a], [f(a,b)]\}$.
+A quick check will show that $EQ_G(E) = \{ [a], [b], [f(a,b)]\}$. 
+But this leaves $\ang{f,b,x}\approx \ang{a}$ as an MGSE, though $[b] \not\in D1(E)$.
+
+This lemma yields a simple but important corollary.
+
+\begin{corollary}
+For any non-collapsing shallow presentation $E$, $|\ec(E)| \le 2d + |D1(E)|$.
+\end{corollary}
+
+We can also use the above lemma to prove a bound on how much larger $E_{rep}$ is than any other presentation of the same theory.
+
+\begin{theorem}
+\label{eqs_bound}
+Let $E$ be any non-collapsing shallow presentation over the alphabet $\Sigma$, and let $E_{rep}$ be the representative presentation formed from the essential classes of $E$. 
+Then $|E_{rep}| \le |\Sigma|^2(2d |E| + 4d)^{2d}$. 
+\end{theorem}
+
+Note that it is not possible to bound $|E_{rep}|$ in terms of $\|E\|$.
+For example, for any positive integer $k$, let $E := \{ f^k(a) \approx a \}$, where $f^k(a)$ is the result of applying $f$ to $a$ $k$ times.
+Then $|E| = |E_{rep}| = 1$, but $\|E\| \ge k$ for any $k$.
+
+We can also prove a polynomial bound on $\|E_{rep}\|$ depending on $\|E\|$ and $|E|$ for any $E \greq E_{rep}$.
+In the following, given a complexity class $c$ of $E$ let $minsize_E(c)$ represent the value $\|t\|$ that is minimized for all $t \in c$.
+
+
+\begin{theorem}
+\label{size_bound}
+Let $E$ be any non-collapsing shallow presentation over the alphabet $\Sigma$, and let $E_{rep}$ be the representative presentation formed from the essential classes of $E$. 
+Then $\|E_{rep}\| \le |E_{rep}|(\|E\|(2d)^{2d}+2)$. 
+\end{theorem}
